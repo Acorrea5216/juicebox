@@ -1,7 +1,7 @@
 // inside db/seed.js
 
 // grab our client with destructuring from the export in index.js
-const {
+const {  
     client,
     createUser,
     updateUser,
@@ -10,6 +10,7 @@ const {
     createPost,
     updatePost,
     getAllPosts,
+    getAllTags,
     getPostsByTagName
   } = require('./index');
   
@@ -17,13 +18,13 @@ const {
     try {
       console.log("Starting to drop tables...");
   
-       // have to make sure to drop in correct order
-    await client.query(`
-    DROP TABLE IF EXISTS post_tags;
-    DROP TABLE IF EXISTS tags;
-    DROP TABLE IF EXISTS posts;
-    DROP TABLE IF EXISTS users;
-  `);
+      // have to make sure to drop in correct order
+      await client.query(`
+        DROP TABLE IF EXISTS post_tags;
+        DROP TABLE IF EXISTS tags;
+        DROP TABLE IF EXISTS posts;
+        DROP TABLE IF EXISTS users;
+      `);
   
       console.log("Finished dropping tables!");
     } catch (error) {
@@ -45,6 +46,7 @@ const {
           location varchar(255) NOT NULL,
           active boolean DEFAULT true
         );
+  
         CREATE TABLE posts (
           id SERIAL PRIMARY KEY,
           "authorId" INTEGER REFERENCES users(id),
@@ -52,15 +54,17 @@ const {
           content TEXT NOT NULL,
           active BOOLEAN DEFAULT true
         );
+  
         CREATE TABLE tags (
-            id SERIAL PRIMARY KEY,
-            name varchar(255) UNIQUE NOT NULL
-          );
-          CREATE TABLE post_tags (
-            "postId" INTEGER REFERENCES posts(id),
-            "tagId" INTEGER REFERENCES tags(id),
-            UNIQUE ("postId", "tagId")
-          );
+          id SERIAL PRIMARY KEY,
+          name varchar(255) UNIQUE NOT NULL
+        );
+  
+        CREATE TABLE post_tags (
+          "postId" INTEGER REFERENCES posts(id),
+          "tagId" INTEGER REFERENCES tags(id),
+          UNIQUE ("postId", "tagId")
+        );
       `);
   
       console.log("Finished building tables!");
@@ -157,7 +161,7 @@ const {
       console.log("Calling updateUser on users[0]");
       const updateUserResult = await updateUser(users[0].id, {
         name: "Newname Sogood",
-        location: "Lesterville, KY",
+        location: "Lesterville, KY"
       });
       console.log("Result:", updateUserResult);
   
@@ -168,23 +172,27 @@ const {
       console.log("Calling updatePost on posts[0]");
       const updatePostResult = await updatePost(posts[0].id, {
         title: "New Title",
-        content: "Updated Content",
+        content: "Updated Content"
       });
       console.log("Result:", updatePostResult);
   
       console.log("Calling updatePost on posts[1], only updating tags");
       const updatePostTagsResult = await updatePost(posts[1].id, {
-        tags: ["#youcandoanything", "#redfish", "#bluefish"],
+        tags: ["#youcandoanything", "#redfish", "#bluefish"]
       });
       console.log("Result:", updatePostTagsResult);
-  
-      console.log("Calling getPostsByTagName with #happy");
-      const postsWithHappy = await getPostsByTagName("#happy");
-      console.log("Result:", postsWithHappy);
   
       console.log("Calling getUserById with 1");
       const albert = await getUserById(1);
       console.log("Result:", albert);
+  
+      console.log("Calling getAllTags");
+      const allTags = await getAllTags();
+      console.log("Result:", allTags);
+  
+      console.log("Calling getPostsByTagName with #happy");
+      const postsWithHappy = await getPostsByTagName("#happy");
+      console.log("Result:", postsWithHappy);
   
       console.log("Finished database tests!");
     } catch (error) {
@@ -193,8 +201,8 @@ const {
     }
   }
   
-
+  
   rebuildDB()
-  .then(testDB)
-  .catch(console.error)
-  .finally(() => client.end());
+    .then(testDB)
+    .catch(console.error)
+    .finally(() => client.end());
