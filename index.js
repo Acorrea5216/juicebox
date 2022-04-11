@@ -27,13 +27,13 @@ server.use((req, res, next) => {
 
 server.get('/background/:color', (req, res, next) => {
     res.send(`
-      <body style="background: ${ req.params.color };">
+      <body style="background: ${req.params.color};">
         <h1>Hello World</h1>
       </body>
     `);
-  });
+});
 
-const PORT = 3000;
+const { PORT = 3000 } = process.env
 server.listen(PORT, () => {
     console.log('The server is up on port', PORT)
 });
